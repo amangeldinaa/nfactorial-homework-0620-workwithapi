@@ -1,8 +1,20 @@
 import {useEffect, useState} from "react";
 import "./App.css";
 import axios from "axios";
+// import { TodoistApi } from '@doist/todoist-api-typescript'
 
-const BACKEND_URL = "http://10.65.132.54:3000";
+// response.setHeader("Access-Control-Allow-Origin", "*");
+// response.setHeader("Access-Control-Allow-Credentials", "true");
+// response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+// response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+
+const BACKEND_URL = "https://api.todoist.com/rest/v1/tasks";
+
+// const api = new TodoistApi('0123456789abcdef0123456789')
+
+// api.getProjects()
+//     .then((projects) => console.log(projects))
+//     .catch((error) => console.log(error))
 
 /*
 * Plan:
@@ -25,20 +37,31 @@ function App() {
   };
 
   const handleAddItem = () => {
-    axios.post(`${BACKEND_URL}/todos`, {
-        label:itemToAdd,
-        done: false
+    axios.post(`https://api.todoist.com/rest/v1/tasks`,
+    {    
+        content: itemToAdd,
+        done: false    
+    },{
+        headers: {
+          Authorization: 'Bearer 4e7bd8183a5c312e96d0bd782844a27c9c4b3147'
+        }
     }).then((response) => {
         setItems([ ...items, response.data])
     })
     setItemToAdd("");
+    console.log(items);
   };
 
 
   const toggleItemDone = ({ id, done }) => {
-      axios.put(`${BACKEND_URL}/todos/${id}`, {
-          done: !done
+      axios.post(`https://api.todoist.com/rest/v1/tasks/${id}/close`, {
+        done: !done
+      },{ 
+        headers: {
+          Authorization: 'Bearer 4e7bd8183a5c312e96d0bd782844a27c9c4b3147'
+        }
       }).then((response) => {
+        console.log(response)
           setItems(items.map((item) => {
               if (item.id === id) {
                   return {
@@ -66,9 +89,15 @@ function App() {
       })
   };
 
+  // const showCompletedItem = ()
+
   useEffect(() => {
       console.log(searchValue)
-      axios.get(`${BACKEND_URL}/todos/?filter=${searchValue}`).then((response) => {
+      axios.get(`https://api.todoist.com/rest/v1/tasks`, {
+        headers: {
+          Authorization: 'Bearer 4e7bd8183a5c312e96d0bd782844a27c9c4b3147'
+        }
+      }).then((response) => {
           setItems(response.data);
       })
   }, [searchValue])
@@ -103,7 +132,7 @@ function App() {
                   className="todo-list-item-label"
                   onClick={() => toggleItemDone(item)}
                 >
-                  {item.label}
+                  {item.content}
                 </span>
 
                 <button
@@ -141,6 +170,13 @@ function App() {
           Add item
         </button>
       </div>
+
+      {/* Show completed */}
+      {/* <div>
+      <button className="btn btn-outline-secondary" onClick={showCompletedItem}>
+          Show completed
+        </button>
+      </div> */}
     </div>
   );
 }
